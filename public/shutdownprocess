@@ -1,0 +1,7 @@
+netstat -ano | findstr :3000
+Note the PID (the last column in the output).
+Kill the process using:
+
+cmd
+Copy code
+taskkill /PID <PID> /F
