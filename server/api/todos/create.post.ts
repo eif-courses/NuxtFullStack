@@ -4,26 +4,36 @@ export default defineEventHandler(async (event) => {
     const db = useDatabase();
     const body = await readBody(event);
 
+
+
     console.log("Request Body:", body); // Log the incoming data for debugging
 
-    const { title, isDone, userId } = await readBody<TodoItem>(event);
+    const { title, isDone} = await readBody<TodoItem>(event);
 
 
     const validIsDone = isDone === 1 ? 1 : 0; // Convert to 1 or 0
 
 
-    if (!title || !userId) {
+    const {user} = await requireUserSession(event)
+
+    if (!user?.id) {
+        throw createError({
+            statusCode: 401,
+            statusMessage: "Unauthorized: User ID is missing.",
+        });
+    }
+
+    if (!title) {
         throw createError({
             statusCode: 400,
-            statusMessage: "Invalid input data. 'title' and 'userId' are required.",
+            statusMessage: "Invalid input data. 'title' are required.",
         });
     }
 
     try {
-        console.log("Inserting Todo:", { title, validIsDone, userId }); // Log the values
         await db.sql`
         INSERT INTO Todos (title, isDone, userId)
-        VALUES (${title}, ${validIsDone}, ${userId});
+        VALUES (${title}, ${validIsDone}, ${user.id});
     `;
         return { message: "Todo created successfully!" };
     } catch (error) {

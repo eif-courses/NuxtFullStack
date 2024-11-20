@@ -1,22 +1,19 @@
-import {defineOAuthGoogleEventHandler} from "#imports";
-
 export default defineOAuthGoogleEventHandler({
     async onSuccess(event, { user, tokens }) {
 
-        // Optionally : find if the user with this email already exists in your database
-        // if not, create the user
-        // .....
-
         await setUserSession(event, {
             user: {
+                id: user.sub,
                 login: user.name,
                 email: user.email,
+                picture: user.picture,
                 loggedInAt: new Date().toISOString(),
             },
-        })
-        return sendRedirect(event, '/')
+        });
+        return sendRedirect(event, '/');
     },
     onError(event, error) {
-        return sendRedirect(event, '/login')
+        console.error('OAuth Error:', error); // Log any errors
+        return sendRedirect(event, '/login');
     },
-})
+});

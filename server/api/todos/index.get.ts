@@ -3,18 +3,19 @@ import {TodoItem} from "~/types/todo";
 export default defineEventHandler(async (event) => {
     const db = useDatabase();
 
-    const query = getQuery(event);
-    const userId = query.userId as string;
 
-    if (!userId) {
+    const {user} = await requireUserSession(event)
+
+    if (!user?.id) {
         throw createError({
-            statusCode: 400,
-            statusMessage: "Invalid User id parameter. It must be a non-empty string.",
+            statusCode: 401,
+            statusMessage: "Unauthorized: User ID is missing.",
         });
     }
 
-    const result = await db.sql<{rows: TodoItem[]}>`
-        SELECT * FROM Todos where userId = ${userId}
+    // If user ID exists, proceed with the query
+    const result = await db.sql<{ rows: TodoItem[] }>`
+        SELECT * FROM Todos WHERE userId = ${user.id}
     `;
 
     const todos: TodoItem[] = result.rows || [];

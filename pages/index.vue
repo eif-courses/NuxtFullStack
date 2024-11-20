@@ -4,6 +4,7 @@
 <!--  https://eventuallymaking.io/2024/03/oauth-nuxt-->
   <div v-if="loggedIn">
     <h1>Welcome {{ user.login }}!</h1>
+    <p>{{user}}</p>
     <p>Logged in since {{ session.loggedInAt }}</p>
     <button @click="clear">Logout</button>
   </div>
